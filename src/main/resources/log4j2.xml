@@ -28,7 +28,7 @@
             <RegexFilter regex=".*socket error.*" onMatch="DENY" onMismatch="ACCEPT"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="128 MB"/>
+                <SizeBasedTriggeringPolicy size="1024 MB"/>
             </Policies>
         </RollingFile>
     
@@ -39,7 +39,7 @@
             </PatternLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="128 MB"/>
+                <SizeBasedTriggeringPolicy size="1024 MB"/>
             </Policies>
         </RollingFile>
     

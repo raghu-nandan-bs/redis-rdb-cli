@@ -31,6 +31,8 @@ esac
 
 lib_dir="$base_dir"/lib
 log_dir="$base_dir"/log
+log_dir=${LOG_BASE_PATH:=$log_dir}
+echo "logging to ${log_dir} base path."
 con_dir="$base_dir"/conf
 
 log_file="$con_dir"/log4j2.xml
