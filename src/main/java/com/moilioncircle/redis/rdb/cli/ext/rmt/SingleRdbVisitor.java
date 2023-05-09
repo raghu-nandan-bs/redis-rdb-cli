@@ -26,6 +26,7 @@ import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.SCRI
 import static com.moilioncircle.redis.rdb.cli.ext.datatype.CommandConstants.ZERO;
 import static com.moilioncircle.redis.rdb.cli.glossary.Measures.ENDPOINT_FAILURE;
 
+import com.moilioncircle.redis.replicator.event.PostRdbSyncEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +63,14 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
     private final boolean legacy;
     private volatile byte[] evalSha;
     private final Configuration conf;
+
+    private int numberOfNonTTLKeys;
     private ThreadLocal<XEndpoint> endpoint = new ThreadLocal<>();
     
     //noinspection ThisEscapedInObjectConstruction
     public SingleRdbVisitor(Replicator replicator, Configure configure, Filter filter, RedisURI uri, boolean replace, boolean legacy) throws Exception {
         super(replicator, configure, filter, replace);
+        this.numberOfNonTTLKeys = 0;
         this.uri = uri;
         this.legacy = legacy;
         this.conf = configure.merge(this.uri, false);
@@ -95,6 +99,8 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
                 XEndpoint.closeQuietly(this.endpoint.get());
             } else if (event instanceof ClosedCommand) {
                 MonitorManager.closeQuietly(manager);
+            } else if (event instanceof PostRdbSyncEvent) {
+                System.out.println("number of keys with no ttl set: "+Integer.toString(this.numberOfNonTTLKeys));
             }
         } catch (Throwable e) {
             // should not reach here, but if reach here ,please report an issue
@@ -123,6 +129,8 @@ public class SingleRdbVisitor extends AbstractRmtRdbVisitor implements EventList
                     return;
                 }
                 expire = String.valueOf(ms).getBytes();
+            } else {
+                this.numberOfNonTTLKeys = this.numberOfNonTTLKeys + 1;
             }
             if (!replace) {
                 endpoint.get().batch(flush, RESTORE, dkv.getKey(), expire, dkv.getValue());
