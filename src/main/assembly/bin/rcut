@@ -33,6 +33,9 @@ lib_dir="$base_dir"/lib
 log_dir="$base_dir"/log
 con_dir="$base_dir"/conf
 
+# OVERRIDE LOGDIR since we are running in containers having read-only FS directories.
+[[ -n "$CUSTOM_LOG_DIR" ]] && log_dir="$CUSTOM_LOG_DIR"
+
 log_file="$con_dir"/log4j2.xml
 con_file="$con_dir"/redis-rdb-cli.conf
 
